@@ -19,15 +19,14 @@ Building
 Build from docker file:
 
 ```
-git clone git@github.com:Zuhkov/docker-containers.git
-cd guacamole
-docker build -t zuhkov/guacamole .
+git clone git@github.com:aptalca/docker-guacamole.git
+docker build -t aptalca/guacamole .
 ```
 
 You can also obtain it via:  
 
 ```
-docker pull zuhkov/guacamole
+docker pull aptalca/guacamole
 ```
 
 ---
@@ -37,7 +36,7 @@ Running
 Create your guacamole config directory (which will contain both the properties file and the database) and then launch with the following:
 
 ```
-docker run -d -v /your-config-location:/config -p 8080:8080 zuhkov/guacamole
+docker run -d -v /your-config-location:/config -p 8080:8080 aptalca/guacamole
 ```
 
 Browse to ```http://your-host-ip:8080``` and login with user and password `guacadmin`
@@ -48,4 +47,4 @@ Credits
 
 Guacamole is an open source project and is copyright Glyptodon LLC
 
-This docker image is built upon the baseimage made by phusion and forked from hall/guacamole
+This docker image is built upon the baseimage made by phusion and forked from hall/guacamole, and further forked from Zuhkov/docker-containers
