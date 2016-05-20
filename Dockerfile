@@ -66,10 +66,10 @@ RUN sed -i -e 's#\(bind-address.*=\).*#\1 127.0.0.1#g' /etc/mysql/my.cnf && \
 
 ### Install MySQL Authentication Module
 RUN cd /tmp && \
-    wget -q --span-hosts http://downloads.sourceforge.net/project/guacamole/current/extensions/guacamole-auth-mysql-${GUAC_VER}.tar.gz && \
-    tar -zxf guacamole-auth-mysql-$GUAC_VER.tar.gz && \
+    wget -q --span-hosts http://downloads.sourceforge.net/project/guacamole/current/extensions/guacamole-auth-mysql-0.9.5.tar.gz && \
+    tar -zxf guacamole-auth-mysql-0.9.5.tar.gz && \
     mv -f `find . -type f -name '*.jar'` /var/lib/guacamole/classpath && \
-    mv -f guacamole-auth-mysql-$GUAC_VER/schema/*.sql /root &&\
+    mv -f guacamole-auth-mysql-0.9.5/schema/*.sql /root &&\
     rm -Rf /tmp/*
 
 ### Install dependancies for mysql authentication module
