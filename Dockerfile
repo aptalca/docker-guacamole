@@ -50,11 +50,11 @@ RUN apt-get update && \
 ### Install the authentication extensions in the classpath folder
 ### and the client app in the tomcat webapp folder
 ### Version of guacamole to be installed
-ENV GUAC_VER 0.9.9
+ENV GUAC_VER 0.9.11
 ### Version of mysql-connector-java to install
-ENV MCJ_VER 5.1.38
+ENV MCJ_VER 5.1.40
 ### config directory and classpath directory
-RUN mkdir -p /config /var/lib/guacamole/classpath /etc/firstrun
+RUN mkdir -p /config /config/ldap-schema /var/lib/guacamole/classpath /etc/firstrun
 
 # Tweak my.cnf
 
@@ -63,6 +63,14 @@ RUN sed -i -e 's#\(bind-address.*=\).*#\1 127.0.0.1#g' /etc/mysql/my.cnf && \
     sed -i -e 's/\(user.*=\).*/\1 nobody/g' /etc/mysql/my.cnf && \
     echo '[mysqld]' > /etc/mysql/conf.d/innodb_file_per_table.cnf && \
     echo 'innodb_file_per_table' >> /etc/mysql/conf.d/innodb_file_per_table.cnf
+
+### Install LDAP Authentication Module
+RUN cd /tmp && \
+    wget -q --span-hosts http://downloads.sourceforge.net/project/guacamole/current/extensions/guacamole-auth-ldap-${GUAC_VER}.tar.gz && \
+    tar -zxf guacamole-auth-ldap-${GUAC_VER}.tar.gz && \
+    mv -f guacamole-auth-ldap-${GUAC_VER}/guacamole-auth-ldap-${GUAC_VER}.jar /var/lib/guacamole/classpath && \
+    mv -f guacamole-auth-ldap-${GUAC_VER}/schema/* /config/ldap-schema &&\
+    rm -Rf /tmp/*
 
 ### Install MySQL Authentication Module
 RUN cd /tmp && \
