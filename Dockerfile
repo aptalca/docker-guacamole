@@ -54,7 +54,7 @@ ENV GUAC_VER 0.9.11-incubating
 ### Version of mysql-connector-java to install
 ENV MCJ_VER 5.1.40
 ### config directory and classpath directory
-RUN mkdir -p /config /config/ldap-schema /var/lib/guacamole/classpath /etc/firstrun
+RUN mkdir -p /config/ldap-schema /var/lib/guacamole/classpath /etc/firstrun
 
 # Tweak my.cnf
 
