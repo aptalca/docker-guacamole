@@ -31,21 +31,21 @@ else
   cp -R /var/lib/guacamole/ldap-schema /config
 fi
 
-if [ -e /config/guacamole/extensions/*duo*.jar ]; then
-  oldDuoFiles=( "/config/guacamole/extensions/*duo*.jar" )
-  newDuoFiles=( "/var/lib/guacamole/extensions/*duo*.jar" )
-  
-  if diff ${oldDuoFiles[0]} ${newDuoFiles[0]} >/dev/null ; then
-    echo "Using existing Duo extension."
-  else
-    echo "Upgrading Duo extension."
-    rm /config/guacamole/extensions/*duo*.jar
-    cp /var/lib/guacamole/extensions/*duo*.jar /config/guacamole/extensions
-  fi
-else
-  echo "Copying Duo extension."
-  cp /var/lib/guacamole/extensions/*duo*.jar /config/guacamole/extensions
-fi
+#if [ -e /config/guacamole/extensions/*duo*.jar ]; then
+#  oldDuoFiles=( "/config/guacamole/extensions/*duo*.jar" )
+#  newDuoFiles=( "/var/lib/guacamole/extensions/*duo*.jar" )
+#
+#  if diff ${oldDuoFiles[0]} ${newDuoFiles[0]} >/dev/null ; then
+#    echo "Using existing Duo extension."
+#  else
+#    echo "Upgrading Duo extension."
+#    rm /config/guacamole/extensions/*duo*.jar
+#    cp /var/lib/guacamole/extensions/*duo*.jar /config/guacamole/extensions
+#  fi
+#else
+#  echo "Copying Duo extension."
+#  cp /var/lib/guacamole/extensions/*duo*.jar /config/guacamole/extensions
+#fi
 
 ln -s /config/guacamole /usr/share/tomcat7/.guacamole
 chown nobody:users -R /config/
