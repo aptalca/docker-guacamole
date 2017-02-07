@@ -74,7 +74,7 @@ RUN cd /tmp && \
 
 ### Install Duo Authentication Module
 RUN cd /tmp && \
-    wget -q --span-hosts http://downloads.sourceforge.net/project/guacamole/current/extensions/guacamole-auth-ldap-${GUAC_VER}.tar.gz && \
+    wget -q --span-hosts http://downloads.sourceforge.net/project/guacamole/current/extensions/guacamole-auth-duo-${GUAC_VER}.tar.gz && \
     tar -zxf guacamole-auth-duo-${GUAC_VER}.tar.gz && \
     mv -f guacamole-auth-duo-${GUAC_VER}/guacamole-auth-duo-${GUAC_VER}.jar /var/lib/guacamole/extensions && \
     rm -Rf /tmp/*
