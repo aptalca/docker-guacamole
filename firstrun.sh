@@ -5,8 +5,7 @@ if [ -f /config/guacamole/guacamole.properties ]; then
   echo "Using existing properties file."
 else
   echo "Creating properties from template."
-  mkdir -p /config/databases /config/guacamole/extensions
-  mv /var/lib/guacamole/classpath/*ldap*.jar /config/guacamole/extensions
+  mkdir -p /config/databases
   cp -R /etc/firstrun/. /config/guacamole
   PW=$(pwgen -1snc 32)
   sed -i -e 's/some_password/'$PW'/g' /config/guacamole/guacamole.properties
