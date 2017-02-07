@@ -72,6 +72,13 @@ RUN cd /tmp && \
     mv -f guacamole-auth-ldap-${GUAC_VER}/schema/* /var/lib/guacamole/ldap-schema &&\
     rm -Rf /tmp/*
 
+### Install Duo Authentication Module
+RUN cd /tmp && \
+    wget -q --span-hosts http://downloads.sourceforge.net/project/guacamole/current/extensions/guacamole-auth-ldap-${GUAC_VER}.tar.gz && \
+    tar -zxf guacamole-auth-duo-${GUAC_VER}.tar.gz && \
+    mv -f guacamole-auth-duo-${GUAC_VER}/guacamole-auth-duo-${GUAC_VER}.jar /var/lib/guacamole/extensions && \
+    rm -Rf /tmp/*
+
 ### Install MySQL Authentication Module
 RUN cd /tmp && \
     wget -q --span-hosts http://downloads.sourceforge.net/project/guacamole/current/extensions/guacamole-auth-jdbc-${GUAC_VER}.tar.gz && \

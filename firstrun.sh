@@ -11,11 +11,12 @@ else
   sed -i -e 's/some_password/'$PW'/g' /config/guacamole/guacamole.properties
 fi
 
-# Check if LDAP extensions file exists. Copy or upgrade if necessary.
+# Check if extensions files exists. Copy or upgrade if necessary.
 if [ -e /config/guacamole/extensions/*ldap*.jar ]; then
-  oldAuthFiles=( "/config/guacamole/extensions/*ldap*.jar" )
-  newAuthFiles=( "/var/lib/guacamole/extensions/*ldap*.jar" )
-  if diff ${oldAuthFiles[0]} ${newAuthFiles[0]} >/dev/null ; then
+  oldLDAPFiles=( "/config/guacamole/extensions/*ldap*.jar" )
+  newLDAPFiles=( "/var/lib/guacamole/extensions/*ldap*.jar" )
+
+  if diff ${oldLDAPFiles[0]} ${newLDAPFiles[0]} >/dev/null ; then
   	echo "Using existing LDAP extension."
   else
   	echo "Upgrading LDAP extension."
@@ -28,6 +29,22 @@ else
   echo "Copying LDAP extension."
   cp /var/lib/guacamole/extensions/*ldap*.jar /config/guacamole/extensions
   cp -R /var/lib/guacamole/ldap-schema /config
+fi
+
+if [ -e /config/guacamole/extensions/*duo*.jar ]; then
+  oldDuoFiles=( "/config/guacamole/extensions/*duo*.jar" )
+  newDuoFiles=( "/var/lib/guacamole/extensions/*duo*.jar" )
+  
+  if diff ${oldDuoFiles[0]} ${newDuoFiles[0]} >/dev/null ; then
+    echo "Using existing Duo extension."
+  else
+    echo "Upgrading Duo extension."
+    rm /config/guacamole/extensions/*duo*.jar
+    cp /var/lib/guacamole/extensions/*duo*.jar /config/guacamole/extensions
+  fi
+else
+  echo "Copying Duo extension."
+  cp /var/lib/guacamole/extensions/*duo*.jar /config/guacamole/extensions
 fi
 
 ln -s /config/guacamole /usr/share/tomcat7/.guacamole
