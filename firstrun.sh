@@ -41,7 +41,6 @@ elif [ $OPTMYSQL = "N" ]; then
 fi
 
 OPTLDAP=${OPT_LDAP^^}
-echo "OPTLDAP: $OPTLDAP"
 if [ $OPTLDAP = "Y" ]; then
   if [ -e /config/guacamole/extensions/*ldap*.jar ]; then
     oldLDAPFiles=( "/config/guacamole/extensions/*ldap*.jar" )
@@ -70,7 +69,6 @@ elif [ $OPTLDAP = "N" ]; then
 fi
 
 OPTDUO=${OPT_DUO^^}
-echo "OPTDUO: $OPTDUO"
 if [ $OPTDUO = "Y" ]; then
   if [ -e /config/guacamole/extensions/*duo*.jar ]; then
     oldDuoFiles=( "/config/guacamole/extensions/*duo*.jar" )
