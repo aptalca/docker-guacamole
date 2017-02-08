@@ -12,7 +12,36 @@ else
 fi
 
 # Check if extensions files exists. Copy or upgrade if necessary.
+OPTMYSQL=${OPT_MYSQL^^}
+if [ $OPTMYSQL = "Y" ]; then
+  if [ -e /config/guacamole/extensions/*mysql*.jar ]; then
+    oldDuoFiles=( "/config/guacamole/extensions/*mysql*.jar" )
+    newDuoFiles=( "/var/lib/guacamole/extensions/*mysql*.jar" )
+
+    if diff ${oldDuoFiles[0]} ${newDuoFiles[0]} >/dev/null ; then
+      echo "Using existing MySQL extension."
+    else
+      echo "Upgrading MySQL extension."
+      rm /config/guacamole/extensions/*mysql*.jar
+      rm /config/guacamole/lib/*
+      cp /var/lib/guacamole/extensions/*mysql*.jar /config/guacamole/extensions
+      cp /var/lib/guacamole/lib/* /config/guacamole/lib
+    fi
+  else
+    echo "Copying MySQL extension."
+    cp /var/lib/guacamole/extensions/*mysql*.jar /config/guacamole/extensions
+    cp /var/lib/guacamole/lib/* /config/guacamole/lib
+  fi
+elif [ $OPTMYSQL = "N" ]; then
+  if [ -e /config/guacamole/extensions/*mysql*.jar ]; then
+    echo "Removing MySQL extension."
+    rm /config/guacamole/extensions/*mysql*.jar
+    rm /config/guacamole/lib/*
+  fi
+fi
+
 OPTLDAP=${OPT_LDAP^^}
+echo "OPTLDAP: $OPTLDAP"
 if [ $OPTLDAP = "Y" ]; then
   if [ -e /config/guacamole/extensions/*ldap*.jar ]; then
     oldLDAPFiles=( "/config/guacamole/extensions/*ldap*.jar" )
@@ -41,6 +70,7 @@ elif [ $OPTLDAP = "N" ]; then
 fi
 
 OPTDUO=${OPT_DUO^^}
+echo "OPTDUO: $OPTDUO"
 if [ $OPTDUO = "Y" ]; then
   if [ -e /config/guacamole/extensions/*duo*.jar ]; then
     oldDuoFiles=( "/config/guacamole/extensions/*duo*.jar" )
