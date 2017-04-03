@@ -6,7 +6,7 @@
 # See https://github.com/phusion/baseimage-docker/blob/master/Changelog.md for
 # a list of version numbers.
 FROM phusion/baseimage:0.9.18
-MAINTAINER Zuhkov <zuhkov@gmail.com> & aptalca
+LABEL maintainer "taddeusz@gmail.com"
 
 # Set correct environment variables.
 ENV HOME /root
@@ -50,9 +50,9 @@ RUN apt-get update && \
 ### Install the authentication extensions in the classpath folder
 ### and the client app in the tomcat webapp folder
 ### Version of guacamole to be installed
-ENV GUAC_VER 0.9.11-incubating
+ENV GUAC_VER 0.9.12-incubating
 ### Version of mysql-connector-java to install
-ENV MCJ_VER 5.1.40
+ENV MCJ_VER 5.1.41
 ### config directory and classpath directory
 RUN mkdir -p /config /var/lib/guacamole/ldap-schema /var/lib/guacamole/lib /var/lib/guacamole/extensions /etc/firstrun
 
