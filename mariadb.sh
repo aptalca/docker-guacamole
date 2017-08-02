@@ -1,4 +1,7 @@
 #!/bin/bash
+
+GUAC_VER="0.9.13"
+
 start_mysql(){
     /usr/bin/mysqld_safe --datadir=/config/databases > /dev/null 2>&1 &
     RET=1
@@ -9,9 +12,34 @@ start_mysql(){
     done
 }
 
+upgrade_database(){
+  echo "Upgrading database."
+  start_mysql
+  echo "$GUAC_VER" > /config/databases/guacamole/version
+  mysql -uroot guacamole < /root/upgrade/upgrade-pre-${GUAC_VER}.sql
+  mysqladmin -u root shutdown
+  sleep 3
+  chown -R nobody:users /config/databases
+  chmod -R 755 /config/databases
+  sleep 3
+  echo "Upgrade complete."
+}
+
 # If databases do not exist, create them
 if [ -f /config/databases/guacamole/guacamole_user.ibd ]; then
   echo "Database exists."
+  if [ -f /config/databases/guacamole/version ]; then
+    OLD_GUAC_VER=`cat /config/databases/guacamole/version`
+    if [ $GUAC_VER != $OLD_GUAC_VER ]
+      echo "Trying to upgrade database."
+      #rm /config/databases/guacamole/version
+      #upgrade_database
+    else
+      echo "Database upgrade not needed."
+    fi
+  else
+    upgrade_database
+  fi
 else
   echo "Initializing Data Directory."
   /usr/bin/mysql_install_db --datadir=/config/databases >/dev/null 2>&1

@@ -92,6 +92,32 @@ elif [ $OPTDUO = "N" ]; then
   fi
 fi
 
-ln -s /config/guacamole /usr/share/tomcat7/.guacamole
+OPTCAS=${OPT_CAS^^}
+if [ $OPTCAS = "Y" ]; then
+  if [ -e /config/guacamole/extensions/*cas*.jar ]; then
+    oldCasFiles=( "/config/guacamole/extensions/*cas*.jar" )
+    newCasFiles=( "/var/lib/guacamole/extensions/*cas*.jar" )
+
+    if diff ${oldCasFiles[0]} ${newCasFiles[0]} >/dev/null ; then
+      echo "Using existing CAS extension."
+    else
+      echo "Upgrading CAS extension."
+      rm /config/guacamole/extensions/*cas*.jar
+      cp /var/lib/guacamole/extensions/*cas*.jar /config/guacamole/extensions
+    fi
+  else
+    echo "Copying CAS extension."
+    cp /var/lib/guacamole/extensions/*cas*.jar /config/guacamole/extensions
+  fi
+elif [ $OPTCAS = "N" ]; then
+  if [ -e /config/guacamole/extensions/*cas*.jar ]; then
+    echo "Removing CAS extension."
+    rm /config/guacamole/extensions/*cas*.jar
+  fi
+fi
+
+if [ ! -f /usr/share/tomcat7/.guacamole ]; then
+  ln -s /config/guacamole /usr/share/tomcat7/.guacamole
+fi
 chown nobody:users -R /config/
 chmod 755 -R /config/

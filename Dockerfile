@@ -50,9 +50,9 @@ RUN apt-get update && \
 ### Install the authentication extensions in the classpath folder
 ### and the client app in the tomcat webapp folder
 ### Version of guacamole to be installed
-ENV GUAC_VER 0.9.12-incubating
+ENV GUAC_VER 0.9.13-incubating
 ### Version of mysql-connector-java to install
-ENV MCJ_VER 5.1.41
+ENV MCJ_VER 5.1.43
 ### config directory and classpath directory
 RUN mkdir -p /config /var/lib/guacamole/ldap-schema /var/lib/guacamole/lib /var/lib/guacamole/extensions /etc/firstrun
 
@@ -79,12 +79,19 @@ RUN cd /tmp && \
     mv -f guacamole-auth-duo-${GUAC_VER}/guacamole-auth-duo-${GUAC_VER}.jar /var/lib/guacamole/extensions && \
     rm -Rf /tmp/*
 
+    ### Install CAS Authentication Module
+RUN cd /tmp && \
+    wget -q --span-hosts http://downloads.sourceforge.net/project/guacamole/current/extensions/guacamole-auth-cas-${GUAC_VER}.tar.gz && \
+    tar -zxf guacamole-auth-cas-${GUAC_VER}.tar.gz && \
+    mv -f guacamole-auth-cas-${GUAC_VER}/guacamole-auth-cas-${GUAC_VER}.jar /var/lib/guacamole/extensions && \
+    rm -Rf /tmp/*
+
 ### Install MySQL Authentication Module
 RUN cd /tmp && \
     wget -q --span-hosts http://downloads.sourceforge.net/project/guacamole/current/extensions/guacamole-auth-jdbc-${GUAC_VER}.tar.gz && \
     tar -zxf guacamole-auth-jdbc-${GUAC_VER}.tar.gz && \
     mv -f guacamole-auth-jdbc-${GUAC_VER}/mysql/guacamole-auth-jdbc-mysql-${GUAC_VER}.jar /var/lib/guacamole/extensions && \
-    mv -f guacamole-auth-jdbc-${GUAC_VER}/mysql/schema/*.sql /root &&\
+    mv -f guacamole-auth-jdbc-${GUAC_VER}/mysql/schema/* /root &&\
     rm -Rf /tmp/*
 
 ### Install dependancies for mysql authentication module
