@@ -14,7 +14,7 @@ fi
 # Check if extensions files exists. Copy or upgrade if necessary.
 OPTMYSQL=${OPT_MYSQL^^}
 if [ $OPTMYSQL = "Y" ]; then
-  if [ -e /config/guacamole/extensions/*mysql*.jar ]; then
+  if [ -f /config/guacamole/extensions/*mysql*.jar ]; then
     oldDuoFiles=( "/config/guacamole/extensions/*mysql*.jar" )
     newDuoFiles=( "/var/lib/guacamole/extensions/*mysql*.jar" )
 
@@ -33,7 +33,7 @@ if [ $OPTMYSQL = "Y" ]; then
     cp /var/lib/guacamole/lib/* /config/guacamole/lib
   fi
 elif [ $OPTMYSQL = "N" ]; then
-  if [ -e /config/guacamole/extensions/*mysql*.jar ]; then
+  if [ -f /config/guacamole/extensions/*mysql*.jar ]; then
     echo "Removing MySQL extension."
     rm /config/guacamole/extensions/*mysql*.jar
     rm /config/guacamole/lib/*
@@ -42,7 +42,7 @@ fi
 
 OPTLDAP=${OPT_LDAP^^}
 if [ $OPTLDAP = "Y" ]; then
-  if [ -e /config/guacamole/extensions/*ldap*.jar ]; then
+  if [ -f /config/guacamole/extensions/*ldap*.jar ]; then
     oldLDAPFiles=( "/config/guacamole/extensions/*ldap*.jar" )
     newLDAPFiles=( "/var/lib/guacamole/extensions/*ldap*.jar" )
 
@@ -61,7 +61,7 @@ if [ $OPTLDAP = "Y" ]; then
     cp -R /var/lib/guacamole/ldap-schema /config
   fi
 elif [ $OPTLDAP = "N" ]; then
-  if [ -e /config/guacamole/extensions/*ldap*.jar ]; then
+  if [ -f /config/guacamole/extensions/*ldap*.jar ]; then
     echo "Removing LDAP extension."
     rm /config/guacamole/extensions/*ldap*.jar
     rm -R /config/ldap-schema
@@ -70,7 +70,7 @@ fi
 
 OPTDUO=${OPT_DUO^^}
 if [ $OPTDUO = "Y" ]; then
-  if [ -e /config/guacamole/extensions/*duo*.jar ]; then
+  if [ -f /config/guacamole/extensions/*duo*.jar ]; then
     oldDuoFiles=( "/config/guacamole/extensions/*duo*.jar" )
     newDuoFiles=( "/var/lib/guacamole/extensions/*duo*.jar" )
 
@@ -86,7 +86,7 @@ if [ $OPTDUO = "Y" ]; then
     cp /var/lib/guacamole/extensions/*duo*.jar /config/guacamole/extensions
   fi
 elif [ $OPTDUO = "N" ]; then
-  if [ -e /config/guacamole/extensions/*duo*.jar ]; then
+  if [ -f /config/guacamole/extensions/*duo*.jar ]; then
     echo "Removing Duo extension."
     rm /config/guacamole/extensions/*duo*.jar
   fi
@@ -94,7 +94,7 @@ fi
 
 OPTCAS=${OPT_CAS^^}
 if [ $OPTCAS = "Y" ]; then
-  if [ -e /config/guacamole/extensions/*cas*.jar ]; then
+  if [ -f /config/guacamole/extensions/*cas*.jar ]; then
     oldCasFiles=( "/config/guacamole/extensions/*cas*.jar" )
     newCasFiles=( "/var/lib/guacamole/extensions/*cas*.jar" )
 
@@ -110,7 +110,7 @@ if [ $OPTCAS = "Y" ]; then
     cp /var/lib/guacamole/extensions/*cas*.jar /config/guacamole/extensions
   fi
 elif [ $OPTCAS = "N" ]; then
-  if [ -e /config/guacamole/extensions/*cas*.jar ]; then
+  if [ -f /config/guacamole/extensions/*cas*.jar ]; then
     echo "Removing CAS extension."
     rm /config/guacamole/extensions/*cas*.jar
   fi
