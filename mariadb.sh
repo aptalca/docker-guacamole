@@ -30,7 +30,7 @@ if [ -f /config/databases/guacamole/guacamole_user.ibd ]; then
   echo "Database exists."
   if [ -f /config/databases/guacamole/version ]; then
     OLD_GUAC_VER=$(cat /config/databases/guacamole/version)
-    if [ $GUAC_VER != $OLD_GUAC_VER ]
+    if [ $GUAC_VER != $OLD_GUAC_VER ]; then
       echo "Trying to upgrade database."
       #rm /config/databases/guacamole/version
       #upgrade_database
