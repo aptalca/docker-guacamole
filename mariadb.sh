@@ -53,6 +53,7 @@ else
   mysql -uroot -e "FLUSH PRIVILEGES"
   mysql -uroot guacamole < /root/001-create-schema.sql
   mysql -uroot guacamole < /root/002-create-admin-user.sql
+  echo "$GUAC_VER" > /config/databases/guacamole/version
   echo "Shutting down."
   mysqladmin -u root shutdown
   sleep 3
