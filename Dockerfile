@@ -38,7 +38,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends libcairo2-dev libpng12-dev freerdp-x11 libssh2-1 \
     libfreerdp-dev libvorbis-dev libssl0.9.8 gcc libssh-dev libpulse-dev tomcat7 tomcat7-admin \
     libpango1.0-dev libssh2-1-dev autoconf wget libossp-uuid-dev libtelnet-dev libvncserver-dev \
-    build-essential software-properties-common pwgen mariadb-server && \
+    build-essential software-properties-common pwgen mariadb-server \
+    libavcodec-dev libavutil-dev libswscale-dev libwebp-dev && \
 
 
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
