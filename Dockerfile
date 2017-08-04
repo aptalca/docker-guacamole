@@ -54,7 +54,7 @@ ENV GUAC_VER 0.9.13-incubating
 ### Version of mysql-connector-java to install
 ENV MCJ_VER 5.1.43
 ### config directory and classpath directory
-RUN mkdir -p /config /var/lib/guacamole/ldap-schema /var/lib/guacamole/lib /var/lib/guacamole/extensions /etc/firstrun
+RUN mkdir -p /config/guacamole /var/lib/guacamole/ldap-schema /var/lib/guacamole/lib /var/lib/guacamole/extensions /etc/firstrun
 
 # Tweak my.cnf
 
@@ -136,7 +136,8 @@ RUN chmod a+x /etc/rc.local && \
     chown -R nobody:users /var/log/mysql* && \
     chown -R nobody:users /var/lib/mysql && \
     chown -R nobody:users /etc/mysql && \
-    chown -R nobody:users /var/run/mysqld
+    chown -R nobody:users /var/run/mysqld && \
+    ln -s /config/guacamole /usr/share/tomcat7/.guacamole
 
 EXPOSE 8080
 

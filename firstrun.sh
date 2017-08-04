@@ -116,7 +116,7 @@ elif [ $OPTCAS = "N" ]; then
   fi
 fi
 
-ln -s /config/guacamole /usr/share/tomcat7/.guacamole
+#ln -s /config/guacamole /usr/share/tomcat7/.guacamole
 
 chown nobody:users -R /config/
 chmod 755 -R /config/
