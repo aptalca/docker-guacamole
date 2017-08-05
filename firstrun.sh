@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CHANGES=false
+
 # Check if properties file exists. If not, copy in the starter database
 if [ -f /config/guacamole/guacamole.properties ]; then
   echo "Using existing properties file."
@@ -9,9 +11,8 @@ else
   cp -R /etc/firstrun/. /config/guacamole
   PW=$(pwgen -1snc 32)
   sed -i -e 's/some_password/'$PW'/g' /config/guacamole/guacamole.properties
+  CHANGES=true
 fi
-
-CHANGES=false
 
 # Check if extensions files exists. Copy or upgrade if necessary.
 OPTMYSQL=${OPT_MYSQL^^}
@@ -128,8 +129,8 @@ fi
 
 if [ "$CHANGES" = true ]; then
   echo "Updating user permissions."
-  chown nobody:users -R /config/
-  chmod 755 -R /config/
+  chown nobody:users -R /config/guacamole
+  chmod 755 -R /config/guacamole
 else
   echo "No permissions changes needed."
 fi
