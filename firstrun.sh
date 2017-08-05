@@ -11,9 +11,11 @@ else
   sed -i -e 's/some_password/'$PW'/g' /config/guacamole/guacamole.properties
 fi
 
+CHANGES=false
+
 # Check if extensions files exists. Copy or upgrade if necessary.
 OPTMYSQL=${OPT_MYSQL^^}
-if [ $OPTMYSQL = "Y" ]; then
+if [ "$OPTMYSQL" = "Y" ]; then
   if [ -f /config/guacamole/extensions/*mysql*.jar ]; then
     oldDuoFiles=( "/config/guacamole/extensions/*mysql*.jar" )
     newDuoFiles=( "/var/lib/guacamole/extensions/*mysql*.jar" )
@@ -26,13 +28,15 @@ if [ $OPTMYSQL = "Y" ]; then
       rm /config/guacamole/lib/*
       cp /var/lib/guacamole/extensions/*mysql*.jar /config/guacamole/extensions
       cp /var/lib/guacamole/lib/* /config/guacamole/lib
+      CHANGES=true
     fi
   else
     echo "Copying MySQL extension."
     cp /var/lib/guacamole/extensions/*mysql*.jar /config/guacamole/extensions
     cp /var/lib/guacamole/lib/* /config/guacamole/lib
+    CHANGES=true
   fi
-elif [ $OPTMYSQL = "N" ]; then
+elif [ "$OPTMYSQL" = "N" ]; then
   if [ -f /config/guacamole/extensions/*mysql*.jar ]; then
     echo "Removing MySQL extension."
     rm /config/guacamole/extensions/*mysql*.jar
@@ -41,7 +45,7 @@ elif [ $OPTMYSQL = "N" ]; then
 fi
 
 OPTLDAP=${OPT_LDAP^^}
-if [ $OPTLDAP = "Y" ]; then
+if [ "$OPTLDAP" = "Y" ]; then
   if [ -f /config/guacamole/extensions/*ldap*.jar ]; then
     oldLDAPFiles=( "/config/guacamole/extensions/*ldap*.jar" )
     newLDAPFiles=( "/var/lib/guacamole/extensions/*ldap*.jar" )
@@ -54,13 +58,15 @@ if [ $OPTLDAP = "Y" ]; then
     	rm -R /config/ldap-schema
     	cp /var/lib/guacamole/extensions/*ldap*.jar /config/guacamole/extensions
     	cp -R /var/lib/guacamole/ldap-schema /config
+      CHANGES=true
     fi
   else
     echo "Copying LDAP extension."
     cp /var/lib/guacamole/extensions/*ldap*.jar /config/guacamole/extensions
     cp -R /var/lib/guacamole/ldap-schema /config
+    CHANGES=true
   fi
-elif [ $OPTLDAP = "N" ]; then
+elif [ "$OPTLDAP" = "N" ]; then
   if [ -f /config/guacamole/extensions/*ldap*.jar ]; then
     echo "Removing LDAP extension."
     rm /config/guacamole/extensions/*ldap*.jar
@@ -69,7 +75,7 @@ elif [ $OPTLDAP = "N" ]; then
 fi
 
 OPTDUO=${OPT_DUO^^}
-if [ $OPTDUO = "Y" ]; then
+if [ "$OPTDUO" = "Y" ]; then
   if [ -f /config/guacamole/extensions/*duo*.jar ]; then
     oldDuoFiles=( "/config/guacamole/extensions/*duo*.jar" )
     newDuoFiles=( "/var/lib/guacamole/extensions/*duo*.jar" )
@@ -80,12 +86,14 @@ if [ $OPTDUO = "Y" ]; then
       echo "Upgrading Duo extension."
       rm /config/guacamole/extensions/*duo*.jar
       cp /var/lib/guacamole/extensions/*duo*.jar /config/guacamole/extensions
+      CHANGES=true
     fi
   else
     echo "Copying Duo extension."
     cp /var/lib/guacamole/extensions/*duo*.jar /config/guacamole/extensions
+    CHANGES=true
   fi
-elif [ $OPTDUO = "N" ]; then
+elif [ "$OPTDUO" = "N" ]; then
   if [ -f /config/guacamole/extensions/*duo*.jar ]; then
     echo "Removing Duo extension."
     rm /config/guacamole/extensions/*duo*.jar
@@ -93,7 +101,7 @@ elif [ $OPTDUO = "N" ]; then
 fi
 
 OPTCAS=${OPT_CAS^^}
-if [ $OPTCAS = "Y" ]; then
+if [ "$OPTCAS" = "Y" ]; then
   if [ -f /config/guacamole/extensions/*cas*.jar ]; then
     oldCasFiles=( "/config/guacamole/extensions/*cas*.jar" )
     newCasFiles=( "/var/lib/guacamole/extensions/*cas*.jar" )
@@ -104,19 +112,24 @@ if [ $OPTCAS = "Y" ]; then
       echo "Upgrading CAS extension."
       rm /config/guacamole/extensions/*cas*.jar
       cp /var/lib/guacamole/extensions/*cas*.jar /config/guacamole/extensions
+      CHANGES=true
     fi
   else
     echo "Copying CAS extension."
     cp /var/lib/guacamole/extensions/*cas*.jar /config/guacamole/extensions
+    CHANGES=true
   fi
-elif [ $OPTCAS = "N" ]; then
+elif [ "$OPTCAS" = "N" ]; then
   if [ -f /config/guacamole/extensions/*cas*.jar ]; then
     echo "Removing CAS extension."
     rm /config/guacamole/extensions/*cas*.jar
   fi
 fi
 
-#ln -s /config/guacamole /usr/share/tomcat7/.guacamole
-
-chown nobody:users -R /config/
-chmod 755 -R /config/
+if [ "$CHANGES" = true ]; then
+  echo "Updating user permissions."
+  chown nobody:users -R /config/
+  chmod 755 -R /config/
+else
+  echo "No permissions changes needed."
+fi
