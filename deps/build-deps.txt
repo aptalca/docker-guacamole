@@ -1,3 +1,4 @@
+wget
 gcc
 autoconf
 build-essential

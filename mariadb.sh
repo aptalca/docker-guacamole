@@ -1,6 +1,7 @@
 #!/bin/bash
 
-GUAC_VER="0.9.13"
+GUAC_VER="0.9.14"
+GUAC_UPG_VER="$GUAC_VER"
 
 start_mysql(){
     /usr/bin/mysqld_safe --datadir=/config/databases > /dev/null 2>&1 &
@@ -13,10 +14,10 @@ start_mysql(){
 }
 
 upgrade_database(){
-  echo "Upgrading database."
+  echo "Upgrading database pre-$GUAC_UPG_VER."
   start_mysql
   echo "$GUAC_VER" > /config/databases/guacamole/version
-  mysql -uroot guacamole < /root/upgrade/upgrade-pre-${GUAC_VER}.sql
+  mysql -uroot guacamole < /root/mysql/upgrade/upgrade-pre-${GUAC_UPG_VER}.sql
   mysqladmin -u root shutdown
   sleep 3
   chown -R nobody:users /config/databases
@@ -26,43 +27,44 @@ upgrade_database(){
 }
 
 # If databases do not exist, create them
-if [ -f /config/databases/guacamole/guacamole_user.ibd ]; then
-  echo "Database exists."
-  if [ -f /config/databases/guacamole/version ]; then
-    OLD_GUAC_VER=$(cat /config/databases/guacamole/version)
-    if [ "$GUAC_VER" != "$OLD_GUAC_VER" ]; then
-      rm /config/databases/guacamole/version
-      upgrade_database
+  if [ -f /config/databases/guacamole/guacamole_user.ibd ]; then
+    echo "Database exists."
+    if [ -f /config/databases/guacamole/version ]; then
+      OLD_GUAC_VER=$(cat /config/databases/guacamole/version)
+      if [ "$GUAC_VER" != "$OLD_GUAC_VER" ]; then
+        rm /config/databases/guacamole/version
+        upgrade_database
+      else
+        echo "Database upgrade not needed."
+      fi
     else
-      echo "Database upgrade not needed."
+      GUAC_UPG_VER="0.9.13"
+      upgrade_database
     fi
   else
-    upgrade_database
+    echo "Initializing Data Directory."
+    /usr/bin/mysql_install_db --datadir=/config/databases >/dev/null 2>&1
+    echo "Installation complete."
+    start_mysql
+    echo "Creating user and database."
+    mysql -uroot -e "CREATE DATABASE guacamole"
+    PW=$(cat /config/guacamole/guacamole.properties | grep -m 1 "mysql-password:\s" | sed 's/mysql-password:\s//')
+    mysql -uroot -e "CREATE USER 'guacamole'@'localhost' IDENTIFIED BY '$PW'"
+    echo "Database created. Granting access to 'guacamole' user for localhost."
+    mysql -uroot -e "GRANT SELECT,INSERT,UPDATE,DELETE ON guacamole.* TO 'guacamole'@'localhost'"
+    mysql -uroot -e "FLUSH PRIVILEGES"
+    mysql -uroot guacamole < /root/mysql/001-create-schema.sql
+    mysql -uroot guacamole < /root/mysql/002-create-admin-user.sql
+    echo "$GUAC_VER" > /config/databases/guacamole/version
+    echo "Shutting down."
+    mysqladmin -u root shutdown
+    sleep 3
+    echo "chown time"
+    chown -R nobody:users /config/databases
+    chmod -R 755 /config/databases
+    sleep 3
+    echo "Initialization complete."
   fi
-else
-  echo "Initializing Data Directory."
-  /usr/bin/mysql_install_db --datadir=/config/databases >/dev/null 2>&1
-  echo "Installation complete."
-  start_mysql
-  echo "Creating user and database."
-  mysql -uroot -e "CREATE DATABASE guacamole"
-  PW=$(cat /config/guacamole/guacamole.properties | grep -m 1 "mysql-password:\s" | sed 's/mysql-password:\s//')
-  mysql -uroot -e "CREATE USER 'guacamole'@'localhost' IDENTIFIED BY '$PW'"
-  echo "Database created. Granting access to 'guacamole' user for localhost."
-  mysql -uroot -e "GRANT SELECT,INSERT,UPDATE,DELETE ON guacamole.* TO 'guacamole'@'localhost'"
-  mysql -uroot -e "FLUSH PRIVILEGES"
-  mysql -uroot guacamole < /root/001-create-schema.sql
-  mysql -uroot guacamole < /root/002-create-admin-user.sql
-  echo "$GUAC_VER" > /config/databases/guacamole/version
-  echo "Shutting down."
-  mysqladmin -u root shutdown
-  sleep 3
-  echo "chown time"
-  chown -R nobody:users /config/databases
-  chmod -R 755 /config/databases
-  sleep 3
-  echo "Initialization complete."
-fi
 
-echo "Starting MariaDB..."
-/usr/bin/mysqld_safe --skip-syslog --datadir='/config/databases'
+  echo "Starting MariaDB..."
+  /usr/bin/mysqld_safe --skip-syslog --datadir='/config/databases'

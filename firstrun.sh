@@ -18,30 +18,69 @@ fi
 OPTMYSQL=${OPT_MYSQL^^}
 if [ "$OPTMYSQL" = "Y" ]; then
   if [ -f /config/guacamole/extensions/*mysql*.jar ]; then
-    oldDuoFiles=( "/config/guacamole/extensions/*mysql*.jar" )
-    newDuoFiles=( "/var/lib/guacamole/extensions/*mysql*.jar" )
+    oldMysqlFiles=( "/config/guacamole/extensions/*mysql*.jar" )
+    newMysqlFiles=( "/var/lib/guacamole/extensions/*mysql*.jar" )
 
-    if diff ${oldDuoFiles[0]} ${newDuoFiles[0]} >/dev/null ; then
+    if diff ${oldMysqlFiles[0]} ${newMysqlFiles[0]} >/dev/null ; then
       echo "Using existing MySQL extension."
     else
       echo "Upgrading MySQL extension."
       rm /config/guacamole/extensions/*mysql*.jar
-      rm /config/guacamole/lib/*
+      cd /config/guacamole/lib
+      rm `find /var/lib/guacamole/lib/mysql/ -name "*.jar" -exec basename {} \;`
       cp /var/lib/guacamole/extensions/*mysql*.jar /config/guacamole/extensions
-      cp /var/lib/guacamole/lib/* /config/guacamole/lib
+      cp /var/lib/guacamole/lib/mysql/* /config/guacamole/lib
       CHANGES=true
     fi
   else
     echo "Copying MySQL extension."
     cp /var/lib/guacamole/extensions/*mysql*.jar /config/guacamole/extensions
-    cp /var/lib/guacamole/lib/* /config/guacamole/lib
+    cp /var/lib/guacamole/lib/mysql/* /config/guacamole/lib
     CHANGES=true
   fi
 elif [ "$OPTMYSQL" = "N" ]; then
   if [ -f /config/guacamole/extensions/*mysql*.jar ]; then
     echo "Removing MySQL extension."
     rm /config/guacamole/extensions/*mysql*.jar
-    rm /config/guacamole/lib/*
+    cd /config/guacamole/lib
+    rm `find /var/lib/guacamole/lib/mysql/ -name "*.jar" -exec basename {} \;`
+  fi
+fi
+
+OPTSQLSERVER=${OPT_SQLSERVER^^}
+if [ "$OPTSQLSERVER" = "Y" ]; then
+  if [ -f /config/guacamole/extensions/*sqlserver*.jar ]; then
+    oldSqlServerFiles=( "/config/guacamole/extensions/*sqlserver*.jar" )
+    newSqlServerFiles=( "/var/lib/guacamole/extensions/*sqlserver*.jar" )
+
+    if diff ${oldSqlServerFiles[0]} ${newSqlServerFiles[0]} >/dev/null ; then
+    	echo "Using existing SQL Server extension."
+    else
+    	echo "Upgrading SQL Server extension."
+    	rm /config/guacamole/extensions/*sqlserver*.jar
+      cd /config/guacamole/lib
+      rm `find /var/lib/guacamole/lib/sqlserver/ -name "*.jar" -exec basename {} \;`
+    	cp /var/lib/guacamole/extensions/*sqlserver*.jar /config/guacamole/extensions
+      cp /var/lib/guacamole/lib/sqlserver/* /config/guacamole/lib
+      rm -R /config/sqlserver-schema/*
+      cp -R /root/sqlserver/* /config/sqlserver-schema
+      CHANGES=true
+    fi
+  else
+    echo "Copying SQL Server extension."
+    cp /var/lib/guacamole/extensions/*sqlserver*.jar /config/guacamole/extensions
+    cp /var/lib/guacamole/lib/sqlserver/* /config/guacamole/lib
+    mkdir /config/sqlserver-schema
+    cp -R /root/sqlserver/* /config/sqlserver-schema
+    CHANGES=true
+  fi
+elif [ "$OPTSQLSERVER" = "N" ]; then
+  if [ -f /config/guacamole/extensions/*sqlserver*.jar ]; then
+    echo "Removing SQL Server extension."
+    rm /config/guacamole/extensions/*sqlserver*.jar
+    cd /config/guacamole/lib
+    rm `find /var/lib/guacamole/lib/sqlserver/ -name "*.jar" -exec basename {} \;`
+    rm -R /config/sqlserver-schema
   fi
 fi
 
@@ -124,6 +163,32 @@ elif [ "$OPTCAS" = "N" ]; then
   if [ -f /config/guacamole/extensions/*cas*.jar ]; then
     echo "Removing CAS extension."
     rm /config/guacamole/extensions/*cas*.jar
+  fi
+fi
+
+OPTOPENID=${OPT_OPENID^^}
+if [ "$OPTOPENID" = "Y" ]; then
+  if [ -f /config/guacamole/extensions/*openid*.jar ]; then
+    oldOpenidFiles=( "/config/guacamole/extensions/*openid*.jar" )
+    newOpenidFiles=( "/var/lib/guacamole/extensions/*openid*.jar" )
+
+    if diff ${oldOpenidFiles[0]} ${newOpenidFiles[0]} >/dev/null ; then
+      echo "Using existing OpenID extension."
+    else
+      echo "Upgrading OpenID extension."
+      rm /config/guacamole/extensions/*openid*.jar
+      cp /var/lib/guacamole/extensions/*openid*.jar /config/guacamole/extensions
+      CHANGES=true
+    fi
+  else
+    echo "Copying OpenID extension."
+    cp /var/lib/guacamole/extensions/*openid*.jar /config/guacamole/extensions
+    CHANGES=true
+  fi
+elif [ "$OPTOPENID" = "N" ]; then
+  if [ -f /config/guacamole/extensions/*openid*.jar ]; then
+    echo "Removing OpenID extension."
+    rm /config/guacamole/extensions/*openid*.jar
   fi
 fi
 
