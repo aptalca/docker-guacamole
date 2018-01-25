@@ -31,9 +31,16 @@ upgrade_database(){
     echo "Database exists."
     if [ -f /config/databases/guacamole/version ]; then
       OLD_GUAC_VER=$(cat /config/databases/guacamole/version)
-      if [ "$GUAC_VER" != "$OLD_GUAC_VER" ]; then
+      IFS="."
+      read -ra OLD_SPLIT <<< "$OLD_GUAC_VER"
+      read -ra NEW_SPLIT <<< "$GUAC_VER"
+      IFS=" "
+      if (( NEW_SPLIT[2] > OLD_SPLIT[2] )); then
+        echo "Database being upgraded."
         rm /config/databases/guacamole/version
         upgrade_database
+      elif (( OLD_SPLIT[2] > NEW_SPLIT[2] )); then
+        echo "Database newer revision, no change needed."
       else
         echo "Database upgrade not needed."
       fi
