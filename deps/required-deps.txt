@@ -32,3 +32,4 @@ libwebpdemux1
 libwebpmux1
 software-properties-common
 fonts-powerline
+ghostscript
