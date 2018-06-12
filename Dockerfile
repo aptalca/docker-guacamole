@@ -138,7 +138,7 @@ RUN cd /usr/local/lib && \
     ln -s guacamole-$GUAC_VER.war guacamole.war
 
 ### config directory and classpath directory
-RUN mkdir -p /config/guacamole /etc/firstrun
+RUN mkdir -p /config/guacamole/log /etc/firstrun
 
 ### Tweak my.cnf
 RUN sed -i -e 's#\(bind-address.*=\).*#\1 127.0.0.1#g' /etc/mysql/my.cnf && \
@@ -152,8 +152,11 @@ COPY rc.local /etc/rc.local
 COPY mariadb.sh /etc/service/mariadb/run
 COPY firstrun.sh /etc/my_init.d/firstrun.sh
 ADD configfiles /etc/firstrun/
-RUN chmod a+x /etc/rc.local && \
+RUN rm /var/lib/tomcat8/logs && \
+    ln -s /config/guacamole/log /var/lib/tomcat8/logs && \
+    chmod a+x /etc/rc.local && \
     chmod +x /etc/service/mariadb/run && \
+    chmod +x /etc/my_init.d/firstrun.sh && \
     chown -R nobody:users /config && \
     chown -R nobody:users /var/log/mysql* && \
     chown -R nobody:users /var/lib/mysql && \

@@ -5,9 +5,13 @@ CHANGES=false
 # Check if properties file exists. If not, copy in the starter database
 if [ -f /config/guacamole/guacamole.properties ]; then
   echo "Using existing properties file."
+  if [ ! -d /config/guacamole/log ]; then
+    echo "Creating Tomcat log directory."
+    mkdir -p /config/guacamole/log
+  fi
 else
   echo "Creating properties from template."
-  mkdir -p /config/databases /config/guacamole/extensions /config/guacamole/lib
+  mkdir -p /config/databases /config/guacamole/extensions /config/guacamole/lib /config/guacamole/log
   cp -R /etc/firstrun/. /config/guacamole
   PW=$(pwgen -1snc 32)
   sed -i -e 's/some_password/'$PW'/g' /config/guacamole/guacamole.properties
