@@ -27,6 +27,11 @@ if [ "$OPTMYSQL" = "Y" ]; then
 
     if diff ${oldMysqlFiles[0]} ${newMysqlFiles[0]} >/dev/null ; then
       echo "Using existing MySQL extension."
+      if [ ! -d /config/mysql-schema ]; then
+        mkdir /config/mysql-schema
+        cp -R /root/mysql/* /config/mysql-schema
+        CHANGES=true
+      fi
     else
       echo "Upgrading MySQL extension."
       rm /config/guacamole/extensions/*mysql*.jar
@@ -34,12 +39,16 @@ if [ "$OPTMYSQL" = "Y" ]; then
       rm `find /var/lib/guacamole/lib/mysql/ -name "*.jar" -exec basename {} \;`
       cp /var/lib/guacamole/extensions/*mysql*.jar /config/guacamole/extensions
       cp /var/lib/guacamole/lib/mysql/* /config/guacamole/lib
+      rm -R /config/mysql-schema/*
+      cp -R /root/mysql/* /config/mysql-schema
       CHANGES=true
     fi
   else
     echo "Copying MySQL extension."
     cp /var/lib/guacamole/extensions/*mysql*.jar /config/guacamole/extensions
     cp /var/lib/guacamole/lib/mysql/* /config/guacamole/lib
+    mkdir /config/mysql-schema
+    cp -R /root/mysql/* /config/mysql-schema
     CHANGES=true
   fi
 elif [ "$OPTMYSQL" = "N" ]; then
@@ -48,6 +57,7 @@ elif [ "$OPTMYSQL" = "N" ]; then
     rm /config/guacamole/extensions/*mysql*.jar
     cd /config/guacamole/lib
     rm `find /var/lib/guacamole/lib/mysql/ -name "*.jar" -exec basename {} \;`
+    rm -R /config/mysql-schema
   fi
 fi
 
