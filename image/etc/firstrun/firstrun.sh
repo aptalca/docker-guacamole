@@ -2,8 +2,19 @@
 
 EXT_STORE="/opt/guacamole"
 GUAC_EXT="/config/guacamole/extensions"
-TOMCAT_LOG="/config/log/tomcat8"
+TOMCAT_LOG="/config/log/tomcat9"
 CHANGES=false
+
+# Move root home folder if it exists.
+if [ ! -L /root ]; then
+  echo "Relocating root home folder"
+  mv /root/.profile /config
+  mv /root/.bashrc /config
+  rmdir /root
+  ln -s /config /root
+  mkdir -p /config/.config/freerdp/certs /config/.config/freerdp/server
+  chown -R nobody:users /config/.config
+fi
 
 # Check if properties file exists. If not, copy in the starter database
 if [ -f /config/guacamole/guacamole.properties ]; then

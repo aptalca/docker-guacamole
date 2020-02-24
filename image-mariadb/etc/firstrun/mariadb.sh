@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GUAC_VER="1.0.0"
+GUAC_VER="1.1.0"
 
 MYSQL_SCHEMA=/opt/guacamole/mysql/schema
 MYSQL_DATABASE=/config/databases
@@ -42,6 +42,13 @@ if [ -f "$MYSQL_DATABASE"/guacamole/guacamole_user.ibd ]; then
     read -ra NEW_SPLIT <<< "$GUAC_VER"
     IFS=" "
     if (( NEW_SPLIT[2] > OLD_SPLIT[2] )) || (( NEW_SPLIT[1] > OLD_SPLIT[1] )) || (( NEW_SPLIT[0] > OLD_SPLIT[0] )); then
+      case $OLD_GUAC_VER in
+      "1.0.0")
+        echo "Database upgrade not needed."
+        echo "$GUAC_VER" > "$MYSQL_DATABASE"/guacamole/version
+        exit 0
+        ;;
+      esac
       echo "Database being upgraded."
       rm "$MYSQL_DATABASE"/guacamole/version
       case $OLD_GUAC_VER in

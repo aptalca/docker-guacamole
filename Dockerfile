@@ -9,7 +9,7 @@
 ARG DEBIAN_VERSION=stable
 ##########################
 ### Get Guacamole Server
-ARG GUAC_VER=1.0.0
+ARG GUAC_VER=1.1.0
 FROM guacamole/guacd:${GUAC_VER} AS guacd
 
 ##########################################
@@ -17,7 +17,7 @@ FROM guacamole/guacd:${GUAC_VER} AS guacd
 ### Use official maven image for the build
 FROM maven:3-jdk-8 AS guacamole
 
-ARG GUAC_VER=1.0.0
+ARG GUAC_VER=1.1.0
 
 ### Use args to build radius auth extension such as
 ### `--build-arg BUILD_PROFILE=lgpl-extensions`
@@ -30,7 +30,6 @@ ADD https://github.com/apache/guacamole-client/archive/${GUAC_VER}.tar.gz /tmp
 
 RUN mkdir -p ${BUILD_DIR}                                && \
     tar -C /tmp -xzf /tmp/${GUAC_VER}.tar.gz             && \
-    ls -al /tmp                                          && \
     mv /tmp/guacamole-client-${GUAC_VER}/* ${BUILD_DIR}
 
 WORKDIR ${BUILD_DIR}
@@ -50,7 +49,7 @@ RUN chmod +x /opt/guacamole/bin/cpexts.sh  && /opt/guacamole/bin/cpexts.sh "$BUI
 
 ###############################
 ### Build image without MariaDB
-FROM debian:${DEBIAN_VERSION} AS nomariadb
+FROM debian:${DEBIAN_VERSION}-slim AS nomariadb
 
 ARG SERVER_PREFIX_DIR=/usr/local/guacamole
 ARG CLIENT_PREFIX_DIR=/opt/guacamole
@@ -68,7 +67,8 @@ ENV GUACD_LOG_LEVEL=info
 RUN usermod -u 99 nobody         && \
     usermod -g 100 nobody        && \
     usermod -d /home nobody      && \
-    chown -R nobody:users /home
+    chown -R nobody:users /home  && \
+    mkdir -p /usr/share/man/man1
 
 ### Don't let apt install docs or man pages
 COPY excludes /etc/dpkg/dpkg.cfg.d/excludes
@@ -77,17 +77,17 @@ COPY excludes /etc/dpkg/dpkg.cfg.d/excludes
 COPY --from=guacd ${SERVER_PREFIX_DIR} ${SERVER_PREFIX_DIR}
 COPY --from=guacamole ${CLIENT_PREFIX_DIR} ${CLIENT_PREFIX_DIR}
 
-ARG RUNTIME_DEPENDENCIES="      \
-    supervisor                  \
-    tomcat8                     \
-    pwgen                       \
-    ghostscript                 \
-    libfreerdp-plugins-standard \
-    fonts-liberation            \
-    fonts-dejavu                \
-    xfonts-terminus             \
-    fonts-powerline             \
-    tzdata                      \
+ARG RUNTIME_DEPENDENCIES=" \
+    supervisor             \
+    tomcat9                \
+    pwgen                  \
+    ca-certificates        \
+    ghostscript            \
+    fonts-liberation       \
+    fonts-dejavu           \
+    xfonts-terminus        \
+    fonts-powerline        \
+    tzdata                 \
     procps"
 
 ### Install packages and clean up in one command to reduce build size
@@ -99,21 +99,24 @@ RUN apt-get update                                                              
 ADD image /
 
 ### Link FreeRDP plugins into proper path
-RUN ${SERVER_PREFIX_DIR}/bin/link-freerdp-plugins.sh ${SERVER_PREFIX_DIR}/lib/freerdp/guac*.so
+RUN ${SERVER_PREFIX_DIR}/bin/link-freerdp-plugins.sh ${SERVER_PREFIX_DIR}/lib/freerdp2/libguac*.so
 
 ### Configure Service Startup
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /bin/tini
-RUN rm -Rf /var/lib/tomcat8/webapps/ROOT                                            && \
-    cp ${CLIENT_PREFIX_DIR}/guacamole.war /var/lib/tomcat8/webapps/guacamole.war    && \
-    ln -s /var/lib/tomcat8/webapps/guacamole.war /var/lib/tomcat8/webapps/ROOT.war  && \
-    chmod +x /etc/firstrun/*.sh                                                     && \
-    chmod +x /bin/tini                                                              && \
-    mkdir -p /config/Guacamole /config/log/tomcat8 /var/lib/tomcat8/temp            && \
-    ln -s /config/guacamole /etc/guacamole                                          && \
-    chown -R root:root /config/log/tomcat8                                          && \
-    rmdir /var/log/tomcat8                                                          && \
-    ln -s /config/log/tomcat8 /var/log/tomcat8
+RUN rm -Rf /var/lib/tomcat9/webapps/ROOT                                                                                                                        && \
+    cp ${CLIENT_PREFIX_DIR}/guacamole.war /var/lib/tomcat9/webapps/guacamole.war                                                                                && \
+    ln -s /var/lib/tomcat9/webapps/guacamole.war /var/lib/tomcat9/webapps/ROOT.war                                                                              && \
+    chmod +x /etc/firstrun/*.sh                                                                                                                                 && \
+    chmod +x /bin/tini                                                                                                                                          && \
+    mkdir -p /config/Guacamole /config/log/tomcat9 /var/lib/tomcat9/temp                                                                                        && \
+    ln -s /config/guacamole /etc/guacamole                                                                                                                      && \
+    chown -R root:root /config/log/tomcat9                                                                                                                      && \
+    rmdir /var/log/tomcat9                                                                                                                                      && \
+    ln -s /config/log/tomcat9 /var/log/tomcat9                                                                                                                  && \
+    sed -i '/<\/Host>/i\'"        <Valve className=\"org.apache.catalina.valves.RemoteIpValve\"" /etc/tomcat9/server.xml                                        && \
+    sed -i '/<\/Host>/i\'"               remoteIpHeader=\"x-forwarded-for\" />" /etc/tomcat9/server.xml
+
 
 EXPOSE 8080
 
@@ -147,7 +150,6 @@ RUN sed -i -e 's#\(datadir.*=\).*#\1 /config/databases#g' /etc/mysql/my.cnf     
     chown -R nobody:users /var/log/mysql*                                                           && \
     chown -R nobody:users /var/lib/mysql                                                            && \
     chown -R nobody:users /etc/mysql                                                                && \
-    chown -R nobody:users /var/run/mysqld                                                           && \
     chmod +x /etc/firstrun/*.sh
 
 ### END
