@@ -21,6 +21,14 @@ tar -xzf extensions/guacamole-auth-cas/target/*.tar.gz \
     --xform="s#.*/##"                                  \
     "*.jar"
 
+mkdir -p "$DESTINATION/header"
+tar -xzf extensions/guacamole-auth-header/target/*.tar.gz \
+    -C "$DESTINATION/header"                              \
+    --wildcards                                           \
+    --no-anchored                                         \
+    --xform="s#.*/##"                                     \
+    "*.jar"
+
 mkdir -p "$DESTINATION/openid"
 tar -xzf extensions/guacamole-auth-openid/target/*.tar.gz \
     -C "$DESTINATION/openid"                              \
@@ -35,6 +43,14 @@ tar -xzf extensions/guacamole-auth-quickconnect/target/*.tar.gz \
     --wildcards                                                 \
     --no-anchored                                               \
     --xform="s#.*/##"                                           \
+    "*.jar"
+
+mkdir -p "$DESTINATION/saml"
+tar -xzf extensions/guacamole-auth-saml/target/*.tar.gz \
+    -C "$DESTINATION/saml"                              \
+    --wildcards                                         \
+    --no-anchored                                       \
+    --xform="s#.*/##"                                   \
     "*.jar"
 
 mkdir -p "$DESTINATION/totp"

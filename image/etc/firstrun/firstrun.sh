@@ -208,12 +208,12 @@ if [ "$OPTOPENID" = "Y" ]; then
     else
       echo "Upgrading OpenID extension."
       rm "$GUAC_EXT"/*openid*.jar
-      cp "$EXT_STORE"/openid/*openid*.jar "$GUAC_EXT"
+      find ${EXT_STORE}/openid/ -name "*.jar" | awk -F/ '{print $NF}' | xargs -I '{}' cp "${EXT_STORE}/openid/{}" "${GUAC_EXT}/1-{}"
       CHANGES=true
     fi
   else
     echo "Copying OpenID extension."
-    cp "$EXT_STORE"/openid/*openid*.jar "$GUAC_EXT"
+    find ${EXT_STORE}/openid/ -name "*.jar" | awk -F/ '{print $NF}' | xargs -I '{}' cp "${EXT_STORE}/openid/{}" "${GUAC_EXT}/1-{}"
     CHANGES=true
   fi
 elif [ "$OPTOPENID" = "N" ]; then
@@ -272,6 +272,58 @@ elif [ "$OPTQUICKCONNECT" = "N" ]; then
   if [ -f "$GUAC_EXT"/*quickconnect*.jar ]; then
     echo "Removing Quick Connect extension."
     rm "$GUAC_EXT"/*quickconnect*.jar
+  fi
+fi
+
+OPTHEADER=${OPT_HEADER^^}
+if [ "$OPTHEADER" = "Y" ]; then
+  if [ -f "$GUAC_EXT"/*header*.jar ]; then
+    oldQCFiles=( "$GUAC_EXT"/*header*.jar )
+    newQCFiles=( "$EXT_STORE"/header/*header*.jar )
+
+    if diff ${oldQCFiles[0]} ${newQCFiles[0]} >/dev/null ; then
+      echo "Using existing Header extension."
+    else
+      echo "Upgrading Header extension."
+      rm "$GUAC_EXT"/*header*.jar
+      cp "$EXT_STORE"/header/*header*.jar "$GUAC_EXT"
+      CHANGES=true
+    fi
+  else
+    echo "Copying Header extension."
+    cp "$EXT_STORE"/header/*header*.jar "$GUAC_EXT"
+    CHANGES=true
+  fi
+elif [ "$OPTHEADER" = "N" ]; then
+  if [ -f "$GUAC_EXT"/*header*.jar ]; then
+    echo "Removing Header extension."
+    rm "$GUAC_EXT"/*header*.jar
+  fi
+fi
+
+OPTSAML=${OPT_SAML^^}
+if [ "$OPTSAML" = "Y" ]; then
+  if [ -f "$GUAC_EXT"/*saml*.jar ]; then
+    oldQCFiles=( "$GUAC_EXT"/*saml*.jar )
+    newQCFiles=( "$EXT_STORE"/saml/*saml*.jar )
+
+    if diff ${oldQCFiles[0]} ${newQCFiles[0]} >/dev/null ; then
+      echo "Using existing SAML extension."
+    else
+      echo "Upgrading SAML extension."
+      rm "$GUAC_EXT"/*saml*.jar
+      cp "$EXT_STORE"/saml/*saml*.jar "$GUAC_EXT"
+      CHANGES=true
+    fi
+  else
+    echo "Copying SAML extension."
+    cp "$EXT_STORE"/saml/*saml*.jar "$GUAC_EXT"
+    CHANGES=true
+  fi
+elif [ "$OPTSAML" = "N" ]; then
+  if [ -f "$GUAC_EXT"/*saml*.jar ]; then
+    echo "Removing SAML extension."
+    rm "$GUAC_EXT"/*saml*.jar
   fi
 fi
 

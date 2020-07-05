@@ -9,7 +9,7 @@
 ARG DEBIAN_VERSION=stable
 ##########################
 ### Get Guacamole Server
-ARG GUAC_VER=1.1.0
+ARG GUAC_VER=1.2.0
 FROM guacamole/guacd:${GUAC_VER} AS guacd
 
 ##########################################
@@ -17,7 +17,7 @@ FROM guacamole/guacd:${GUAC_VER} AS guacd
 ### Use official maven image for the build
 FROM maven:3-jdk-8 AS guacamole
 
-ARG GUAC_VER=1.1.0
+ARG GUAC_VER=1.2.0
 
 ### Use args to build radius auth extension such as
 ### `--build-arg BUILD_PROFILE=lgpl-extensions`
@@ -90,10 +90,11 @@ ARG RUNTIME_DEPENDENCIES=" \
     tzdata                 \
     procps"
 
+
 ### Install packages and clean up in one command to reduce build size
-RUN apt-get update                                                                                                                              && \
-    apt-get install -y --no-install-recommends $RUNTIME_DEPENDENCIES                                                                            && \
-    apt-get install -y --no-install-recommends $(cat "${SERVER_PREFIX_DIR}"/DEPENDENCIES)                                                       && \
+RUN apt-get update                                                                          && \
+    apt-get install -y --no-install-recommends $RUNTIME_DEPENDENCIES                        && \
+    apt-get install -y --no-install-recommends $(cat "${SERVER_PREFIX_DIR}"/DEPENDENCIES)   && \
     rm -rf /var/lib/apt/lists/*
 
 ADD image /
