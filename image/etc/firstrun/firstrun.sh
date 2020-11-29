@@ -335,4 +335,4 @@ else
   echo "No permissions changes needed."
 fi
 
-exec /bin/tini -- /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf
+exec /bin/tini -s -- /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf

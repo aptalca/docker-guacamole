@@ -338,7 +338,7 @@ fi
 
 if [ "$OPTMYSQL" = "Y" ]; then
   /etc/firstrun/mariadb.sh
-  exec /bin/tini -- /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord-mariadb.conf
+  exec /bin/tini -s -- /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord-mariadb.conf
 else
-  exec /bin/tini -- /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf
+  exec /bin/tini -s -- /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf
 fi
