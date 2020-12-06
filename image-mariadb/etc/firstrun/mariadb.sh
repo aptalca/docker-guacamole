@@ -5,15 +5,25 @@ GUAC_VER="1.0.0"
 MYSQL_SCHEMA=/opt/guacamole/mysql/schema
 MYSQL_DATABASE=/config/databases
 
+sed -i -e 's#\(datadir.*=\).*#\1 /config/databases#g' /etc/mysql/my.cnf
+sed -i -e 's#\(bind-address.*=\).*#\1 127.0.0.1#g' /etc/mysql/my.cnf
+sed -i -e '/log_warnings.*=.*/a log_error = /config/databases/mysql_safe.log' /etc/mysql/my.cnf
+sed -i -e 's/\(user.*=\).*/\1 nobody/g' /etc/mysql/my.cnf
+echo '[mysqld]' > /etc/mysql/conf.d/innodb_file_per_table.cnf
+echo 'innodb_file_per_table' >> /etc/mysql/conf.d/innodb_file_per_table.cnf
+mkdir -p /var/run/mysqld
+chown -R abc:abc /var/log/mysql /var/run/mysqld
+chmod -R 777 /var/log/mysql /var/run/mysqld
+
 start_mysql() {
-    echo "Starting MariaDB."
-    /usr/bin/mysqld_safe > /dev/null 2>&1 &
-    RET=1
-    while [[ RET -ne 0 ]]; do
-        mysql -uroot -e "status" > /dev/null 2>&1
-        RET=$?
-        sleep 1
-    done
+  echo "Starting MariaDB."
+  /usr/bin/mysqld_safe > /dev/null 2>&1 &
+  RET=1
+  while [[ RET -ne 0 ]]; do
+      mysql -uroot -e "status" > /dev/null 2>&1
+      RET=$?
+      sleep 1
+  done
 }
 
 stop_mysqld() {
@@ -85,7 +95,7 @@ else
     echo "$GUAC_VER" > "$MYSQL_DATABASE"/guacamole/version
     stop_mysqld
     echo "Setting database file permissions"
-    chown -R nobody:users /config/databases
+    chown -R abc:abc /config/databases
     chmod -R 755 /config/databases
     sleep 3
     echo "Initialization complete."

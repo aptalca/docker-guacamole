@@ -5,16 +5,23 @@ GUAC_EXT="/config/guacamole/extensions"
 TOMCAT_LOG="/config/log/tomcat9"
 CHANGES=false
 
-# Move root home folder if it exists.
-if [ ! -L /root ]; then
-  echo "Relocating root home folder"
-  mv /root/.profile /config
-  mv /root/.bashrc /config
-  rmdir /root
-  ln -s /config /root
-  mkdir -p /config/.config/freerdp/certs /config/.config/freerdp/server
-  chown -R nobody:users /config/.config
-fi
+# Create user
+PUID=${PUID:-99}
+PGID=${PGID:-100}
+
+groupmod -o -g "$PGID" abc
+usermod -o -u "$PUID" abc
+
+echo "----------------------"
+echo "User UID: $(id -u abc)"
+echo "User GID: $(id -g abc)"
+echo "----------------------"
+
+chown -R abc:abc /config
+chown -R abc:abc /var/run/tomcat /var/lib/tomcat9 /usr/share/tomcat9 /etc/tomcat9
+chown abc:abc /var/run/tomcat
+
+OPTMYSQL=${OPT_MYSQL:-N}
 
 # Check if properties file exists. If not, copy in the starter database
 if [ -f /config/guacamole/guacamole.properties ]; then
@@ -22,20 +29,25 @@ if [ -f /config/guacamole/guacamole.properties ]; then
   if [ ! -d "$TOMCAT_LOG" ]; then
     echo "Creating log directory."
     mkdir -p "$TOMCAT_LOG"
-    chown -R root:root "$TOMCAT_LOG"
+    chown -R abc:abc "$TOMCAT_LOG"
   fi
 else
   echo "Creating properties from template."
-  mkdir -p /config/databases "$GUAC_EXT" /config/guacamole/lib "$TOMCAT_LOG"
-  chown -R root:root "$TOMCAT_LOG"
+  mkdir -p "$GUAC_EXT" /config/guacamole/lib "$TOMCAT_LOG"
   cp /etc/firstrun/templates/* /config/guacamole
+  chown -R abc:abc /config/guacamole "$TOMCAT_LOG"
+  if [ "$OPTMYSQL" = "Y" ] && [ -f /etc/firstrun/mariadb.sh ]; then
+    echo "Creating Database folders"
+    mkdir -p /config/databases
+    chown abc:abc /config/databases
+  fi
   PW=$(pwgen -1snc 32)
   sed -i -e 's/some_password/'$PW'/g' /config/guacamole/guacamole.properties
   CHANGES=true
 fi
 
 # Check if extensions files exists. Copy or upgrade if necessary.
-OPTMYSQL=${OPT_MYSQL^^}
+OPTMYSQL=${OPT_MYSQL:-N}
 if [ "$OPTMYSQL" = "Y" ]; then
   if [ -f "$GUAC_EXT"/*jdbc-mysql*.jar ]; then
     oldMysqlFiles=( "$GUAC_EXT"/*jdbc-mysql*.jar )
@@ -77,7 +89,7 @@ elif [ "$OPTMYSQL" = "N" ]; then
   fi
 fi
 
-OPTSQLSERVER=${OPT_SQLSERVER^^}
+OPTSQLSERVER=${OPT_SQLSERVER:-N}
 if [ "$OPTSQLSERVER" = "Y" ]; then
   if [ -f "$GUAC_EXT"/*sqlserver*.jar ]; then
     oldSqlServerFiles=( "$GUAC_EXT"/*sqlserver*.jar )
@@ -88,10 +100,7 @@ if [ "$OPTSQLSERVER" = "Y" ]; then
     else
     	echo "Upgrading SQL Server extension."
     	rm "$GUAC_EXT"/*sqlserver*.jar
-      # cd /config/guacamole/lib
-      # rm `find /var/lib/guacamole/lib/sqlserver/ -name "*.jar" -exec basename {} \;`
     	cp "$EXT_STORE"/sqlserver/*sqlserver*.jar "$GUAC_EXT"
-      # cp /var/lib/guacamole/lib/sqlserver/* /config/guacamole/lib
       rm -R /config/sqlserver-schema/*
       cp -R "$EXT_STORE"/sqlserver/schema/* /config/sqlserver-schema
       CHANGES=true
@@ -99,7 +108,6 @@ if [ "$OPTSQLSERVER" = "Y" ]; then
   else
     echo "Copying SQL Server extension."
     cp "$EXT_STORE"/sqlserver/*sqlserver*.jar "$GUAC_EXT"
-    # cp /var/lib/guacamole/lib/sqlserver/* /config/guacamole/lib
     mkdir /config/sqlserver-schema
     cp -R "$EXT_STORE"/sqlserver/schema/* /config/sqlserver-schema
     CHANGES=true
@@ -108,13 +116,11 @@ elif [ "$OPTSQLSERVER" = "N" ]; then
   if [ -f "$GUAC_EXT"/*sqlserver*.jar ]; then
     echo "Removing SQL Server extension."
     rm "$GUAC_EXT"/*sqlserver*.jar
-    # cd /config/guacamole/lib
-    # rm `find /var/lib/guacamole/lib/sqlserver/ -name "*.jar" -exec basename {} \;`
     rm -R /config/sqlserver-schema
   fi
 fi
 
-OPTLDAP=${OPT_LDAP^^}
+OPTLDAP=${OPT_LDAP:-N}
 if [ "$OPTLDAP" = "Y" ]; then
   if [ -f "$GUAC_EXT"/*ldap*.jar ]; then
     oldLDAPFiles=( "$GUAC_EXT"/*ldap*.jar )
@@ -145,7 +151,7 @@ elif [ "$OPTLDAP" = "N" ]; then
   fi
 fi
 
-OPTDUO=${OPT_DUO^^}
+OPTDUO=${OPT_DUO:-N}
 if [ "$OPTDUO" = "Y" ]; then
   if [ -f "$GUAC_EXT"/*duo*.jar ]; then
     oldDuoFiles=( "$GUAC_EXT"/*duo*.jar )
@@ -171,7 +177,7 @@ elif [ "$OPTDUO" = "N" ]; then
   fi
 fi
 
-OPTCAS=${OPT_CAS^^}
+OPTCAS=${OPT_CAS:-N}
 if [ "$OPTCAS" = "Y" ]; then
   if [ -f "$GUAC_EXT"/*cas*.jar ]; then
     oldCasFiles=( "$GUAC_EXT"/*cas*.jar )
@@ -197,7 +203,7 @@ elif [ "$OPTCAS" = "N" ]; then
   fi
 fi
 
-OPTOPENID=${OPT_OPENID^^}
+OPTOPENID=${OPT_OPENID:-N}
 if [ "$OPTOPENID" = "Y" ]; then
   if [ -f "$GUAC_EXT"/*openid*.jar ]; then
     oldOpenidFiles=( "$GUAC_EXT"/*openid*.jar )
@@ -223,7 +229,7 @@ elif [ "$OPTOPENID" = "N" ]; then
   fi
 fi
 
-OPTTOTP=${OPT_TOTP^^}
+OPTTOTP=${OPT_TOTP:-N}
 if [ "$OPTTOTP" = "Y" ]; then
   if [ -f "$GUAC_EXT"/*totp*.jar ]; then
     oldTotpFiles=( "$GUAC_EXT"/*totp*.jar )
@@ -249,7 +255,7 @@ elif [ "$OPTTOTP" = "N" ]; then
   fi
 fi
 
-OPTQUICKCONNECT=${OPT_QUICKCONNECT^^}
+OPTQUICKCONNECT=${OPT_QUICKCONNECT:-N}
 if [ "$OPTQUICKCONNECT" = "Y" ]; then
   if [ -f "$GUAC_EXT"/*quickconnect*.jar ]; then
     oldQCFiles=( "$GUAC_EXT"/*quickconnect*.jar )
@@ -275,7 +281,7 @@ elif [ "$OPTQUICKCONNECT" = "N" ]; then
   fi
 fi
 
-OPTHEADER=${OPT_HEADER^^}
+OPTHEADER=${OPT_HEADER:-N}
 if [ "$OPTHEADER" = "Y" ]; then
   if [ -f "$GUAC_EXT"/*header*.jar ]; then
     oldQCFiles=( "$GUAC_EXT"/*header*.jar )
@@ -301,7 +307,7 @@ elif [ "$OPTHEADER" = "N" ]; then
   fi
 fi
 
-OPTSAML=${OPT_SAML^^}
+OPTSAML=${OPT_SAML:-N}
 if [ "$OPTSAML" = "Y" ]; then
   if [ -f "$GUAC_EXT"/*saml*.jar ]; then
     oldQCFiles=( "$GUAC_EXT"/*saml*.jar )
@@ -329,10 +335,17 @@ fi
 
 if [ "$CHANGES" = true ]; then
   echo "Updating user permissions."
-  chown nobody:users -R /config/guacamole
+  chown abc:abc -R /config/guacamole
   chmod 755 -R /config/guacamole
 else
   echo "No permissions changes needed."
 fi
 
-exec /bin/tini -s -- /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf
+# exec /bin/tini -s -- /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf
+
+if [ "$OPTMYSQL" = "Y" ] && [ -f /etc/firstrun/mariadb.sh ]; then
+  /etc/firstrun/mariadb.sh
+  exec /bin/tini -s -- /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord-mariadb.conf
+else
+  exec /bin/tini -s -- /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf
+fi

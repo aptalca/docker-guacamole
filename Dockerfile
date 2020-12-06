@@ -55,20 +55,13 @@ ARG SERVER_PREFIX_DIR=/usr/local/guacamole
 ARG CLIENT_PREFIX_DIR=/opt/guacamole
 
 ### Set correct environment variables.
-ENV HOME=/root
+ENV HOME=/config
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LC_ALL=C.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 ENV LD_LIBRARY_PATH=${SERVER_PREFIX_DIR}/lib
 ENV GUACD_LOG_LEVEL=info
-
-### Configure user nobody to match unRAID's settings
-RUN usermod -u 99 nobody         && \
-    usermod -g 100 nobody        && \
-    usermod -d /home nobody      && \
-    chown -R nobody:users /home  && \
-    mkdir -p /usr/share/man/man1
 
 ### Don't let apt install docs or man pages
 COPY excludes /etc/dpkg/dpkg.cfg.d/excludes
@@ -92,7 +85,10 @@ ARG RUNTIME_DEPENDENCIES=" \
 
 
 ### Install packages and clean up in one command to reduce build size
-RUN apt-get update                                                                          && \
+RUN useradd -u 99 -U -d /config -s /bin/false abc                                           && \
+    usermod -G users abc                                                                    && \
+    mkdir -p /usr/share/man/man1                                                            && \
+    apt-get update                                                                          && \
     apt-get install -y --no-install-recommends $RUNTIME_DEPENDENCIES                        && \
     apt-get install -y --no-install-recommends $(cat "${SERVER_PREFIX_DIR}"/DEPENDENCIES)   && \
     rm -rf /var/lib/apt/lists/*
@@ -110,9 +106,8 @@ RUN rm -Rf /var/lib/tomcat9/webapps/ROOT                                        
     ln -s /var/lib/tomcat9/webapps/guacamole.war /var/lib/tomcat9/webapps/ROOT.war                                                                              && \
     chmod +x /etc/firstrun/*.sh                                                                                                                                 && \
     chmod +x /bin/tini                                                                                                                                          && \
-    mkdir -p /config/Guacamole /config/log/tomcat9 /var/lib/tomcat9/temp                                                                                        && \
+    mkdir -p /config/guacamole /config/log/tomcat9 /var/lib/tomcat9/temp /var/run/tomcat                                                                        && \
     ln -s /config/guacamole /etc/guacamole                                                                                                                      && \
-    chown -R root:root /config/log/tomcat9                                                                                                                      && \
     rmdir /var/log/tomcat9                                                                                                                                      && \
     ln -s /config/log/tomcat9 /var/log/tomcat9                                                                                                                  && \
     sed -i '/<\/Host>/i\'"        <Valve className=\"org.apache.catalina.valves.RemoteIpValve\"" /etc/tomcat9/server.xml                                        && \
@@ -140,18 +135,7 @@ RUN apt-get update                                                              
 
 ADD image-mariadb /
 
-### Tweak my.cnf & Change Folder Permissions
-RUN sed -i -e 's#\(datadir.*=\).*#\1 /config/databases#g' /etc/mysql/my.cnf                         && \
-    sed -i -e 's#\(bind-address.*=\).*#\1 127.0.0.1#g' /etc/mysql/my.cnf                            && \
-    sed -i -e '/log_warnings.*=.*/a log_error = /config/databases/mysql_safe.log' /etc/mysql/my.cnf && \
-    sed -i -e 's/\(user.*=\).*/\1 nobody/g' /etc/mysql/my.cnf                                       && \
-    echo '[mysqld]' > /etc/mysql/conf.d/innodb_file_per_table.cnf                                   && \
-    echo 'innodb_file_per_table' >> /etc/mysql/conf.d/innodb_file_per_table.cnf                     && \
-    chown -R nobody:users /config                                                                   && \
-    chown -R nobody:users /var/log/mysql*                                                           && \
-    chown -R nobody:users /var/lib/mysql                                                            && \
-    chown -R nobody:users /etc/mysql                                                                && \
-    chmod +x /etc/firstrun/*.sh
+RUN chmod +x /etc/firstrun/mariadb.sh
 
 ### END
 ### To make this a persistent guacamole container, you must map /config of this container
