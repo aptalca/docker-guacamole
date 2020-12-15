@@ -79,7 +79,7 @@ if [ "$OPTMYSQL" = "Y" ] || [ "$OPTMYSQLEXT" = "Y" ]; then
     cp -R "$EXT_STORE"/mysql/schema/* /config/mysql-schema
     CHANGES=true
   fi
-elif [ "$OPTMYSQL" = "N" ]; then
+elif [ "$OPTMYSQL" = "N" ] || [ "$OPTMYSQLEXT" = "N" ]; then
   if [ -f "$GUAC_EXT"/*jdbc-mysql*.jar ]; then
     echo "Removing MySQL extension."
     rm "$GUAC_EXT"/*jdbc-mysql*.jar
