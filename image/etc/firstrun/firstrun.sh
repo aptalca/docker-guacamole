@@ -47,8 +47,8 @@ else
 fi
 
 # Check if extensions files exists. Copy or upgrade if necessary.
-OPTMYSQL=${OPT_MYSQL:-N}
-if [ "$OPTMYSQL" = "Y" ]; then
+OPTMYSQLEXT=${OPT_MYSQL_EXTENSION:-N}
+if [ "$OPTMYSQL" = "Y" ] || [ "$OPTMYSQLEXT" = "Y" ]; then
   if [ -f "$GUAC_EXT"/*jdbc-mysql*.jar ]; then
     oldMysqlFiles=( "$GUAC_EXT"/*jdbc-mysql*.jar )
     newMysqlFiles=( "$EXT_STORE"/mysql/*jdbc-mysql*.jar )
