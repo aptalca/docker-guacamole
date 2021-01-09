@@ -6,10 +6,10 @@
 # See https://github.com/phusion/baseimage-docker/blob/master/Changelog.md for
 # a list of version numbers.
 
-ARG DEBIAN_VERSION=stable
+ARG DEBIAN_VERSION=buster
 ##########################
 ### Get Guacamole Server
-ARG GUAC_VER=1.2.0
+ARG GUAC_VER=1.3.0
 FROM guacamole/guacd:${GUAC_VER} AS guacd
 
 ##########################################
@@ -17,7 +17,7 @@ FROM guacamole/guacd:${GUAC_VER} AS guacd
 ### Use official maven image for the build
 FROM maven:3-jdk-8 AS guacamole
 
-ARG GUAC_VER=1.2.0
+ARG GUAC_VER=1.3.0
 
 ### Use args to build radius auth extension such as
 ### `--build-arg BUILD_PROFILE=lgpl-extensions`
@@ -51,6 +51,8 @@ RUN chmod +x /opt/guacamole/bin/cpexts.sh  && /opt/guacamole/bin/cpexts.sh "$BUI
 ### Build image without MariaDB
 FROM debian:${DEBIAN_VERSION}-slim AS nomariadb
 
+ARG DEBIAN_RELEASE=buster-backports
+
 ARG SERVER_PREFIX_DIR=/usr/local/guacamole
 ARG CLIENT_PREFIX_DIR=/opt/guacamole
 
@@ -74,6 +76,7 @@ ARG RUNTIME_DEPENDENCIES=" \
     supervisor             \
     tomcat9                \
     pwgen                  \
+    netcat-openbsd         \
     ca-certificates        \
     ghostscript            \
     fonts-liberation       \
@@ -85,12 +88,14 @@ ARG RUNTIME_DEPENDENCIES=" \
 
 
 ### Install packages and clean up in one command to reduce build size
-RUN useradd -u 99 -U -d /config -s /bin/false abc                                           && \
-    usermod -G users abc                                                                    && \
-    mkdir -p /usr/share/man/man1                                                            && \
-    apt-get update                                                                          && \
-    apt-get install -y --no-install-recommends $RUNTIME_DEPENDENCIES                        && \
-    apt-get install -y --no-install-recommends $(cat "${SERVER_PREFIX_DIR}"/DEPENDENCIES)   && \
+RUN useradd -u 99 -U -d /config -s /bin/false abc                                                               && \
+    usermod -G users abc                                                                                        && \
+    mkdir -p /usr/share/man/man1                                                                                && \
+    grep " ${DEBIAN_RELEASE} " /etc/apt/sources.list || echo >> /etc/apt/sources.list                           \
+    "deb http://deb.debian.org/debian ${DEBIAN_RELEASE} main contrib non-free"                                  && \
+    apt-get update                                                                                              && \
+    apt-get install -t ${DEBIAN_RELEASE} -y --no-install-recommends $RUNTIME_DEPENDENCIES                       && \
+    apt-get install -t ${DEBIAN_RELEASE} -y --no-install-recommends $(cat "${SERVER_PREFIX_DIR}"/DEPENDENCIES)  && \
     rm -rf /var/lib/apt/lists/*
 
 ADD image /
@@ -125,8 +130,10 @@ CMD [ "/etc/firstrun/firstrun.sh" ]
 ### Build image with MariaDB 
 FROM nomariadb
 
+ARG DEBIAN_RELEASE=buster-backports
+
 RUN apt-get update                                                                                                                              && \
-    apt-get install -y --no-install-recommends dirmngr gnupg                                                                                    && \
+    apt-get install -t ${DEBIAN_RELEASE} -y --no-install-recommends dirmngr gnupg                                                                                    && \
     apt-key adv --no-tty --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8                                                        && \
     echo 'deb [arch=amd64,i386,ppc64el] http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.2/debian stretch main' >> /etc/apt/sources.list    && \
     apt-get update                                                                                                                              && \
