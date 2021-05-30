@@ -50,6 +50,7 @@ RUN chmod +x /opt/guacamole/bin/cpexts.sh  && /opt/guacamole/bin/cpexts.sh "$BUI
 ###############################
 ### Build image without MariaDB
 FROM debian:${DEBIAN_VERSION}-slim AS nomariadb
+LABEL version="1.3.0-1"
 
 ARG DEBIAN_RELEASE=buster-backports
 
@@ -130,6 +131,7 @@ CMD [ "/etc/firstrun/firstrun.sh" ]
 ############################
 ### Build image with MariaDB 
 FROM nomariadb
+LABEL version="1.3.0-1"
 
 ARG DEBIAN_RELEASE=buster-backports
 
