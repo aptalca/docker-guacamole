@@ -84,6 +84,7 @@ ARG RUNTIME_DEPENDENCIES=" \
     xfonts-terminus        \
     fonts-powerline        \
     tzdata                 \
+    logrotate              \
     procps"
 
 
