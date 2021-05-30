@@ -97,8 +97,8 @@ else
     echo "Setting database file permissions"
     chown -R abc:abc /config/databases
     chmod -R 755 /config/databases
-	echo "Removing mysql-server logrotate directive"
-	rm /etc/logrotate.d/mysql-server
+    echo "Removing mysql-server logrotate directive"
+    rm /etc/logrotate.d/mysql-server
     sleep 3
     echo "Initialization complete."
   else
