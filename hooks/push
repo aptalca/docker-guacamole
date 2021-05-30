@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ $DOCKER_TAG == "latest" ]
+then
+    docker push ${IMAGE_NAME}
+else
+    docker push ${DOCKER_REPO}:latest-${DOCKER_TAG}
+fi
