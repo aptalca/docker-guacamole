@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ $DOCKER_TAG == "latest" ]
+then
+    docker build -t $IMAGE_NAME .
+else
+    docker build --target $DOCKER_TAG -t $DOCKER_REPO:latest-$DOCKER_TAG .
+fi
