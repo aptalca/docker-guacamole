@@ -33,10 +33,12 @@ docker pull jasonbean/guacamole
 Running
 ===
 
-Create your guacamole config directory (which will contain both the properties file and the database) and then launch with the following:
+Create your guacamole config directory (which will contain both the properties file and the database).
+
+To run using MariaDB for user authentication, launch with the following:
 
 ```
-docker run -d -v /your-config-location:/config -p 8080:8080 jasonbean/guacamole
+docker run -d -v /your-config-location:/config -p 8080:8080 -e OPT_MYSQL=Y jasonbean/guacamole
 ```
 
 Browse to ```http://your-host-ip:8080``` and login with user and password `guacadmin`
